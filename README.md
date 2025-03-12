@@ -16,8 +16,14 @@ La aplicación usa el dataset `vehicles_us.csv`, que contiene información sobre
 - **Condición del vehículo (`condition`)**
 - **Otros atributos relevantes**
 
+## 📊 Enlace a Render:
+https://cardata-insights.onrender.com/
+
+
 ## 🚀 Cómo ejecutar la aplicación
 ### 🔹 **1. Clonar el repositorio**
 ```bash
 git clone https://github.com/tu-usuario/tu-repo.git
 cd tu-repo
+
+
