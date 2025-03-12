@@ -18,12 +18,13 @@ La aplicación usa el dataset `vehicles_us.csv`, que contiene información sobre
 
 ## 📊 Enlace a Render:
 https://cardata-insights.onrender.com/
-
+## 💻 Enlace a Github:
+https://github.com/DanyHook/poryect_spint_7.git
 
 ## 🚀 Cómo ejecutar la aplicación
 ### 🔹 **1. Clonar el repositorio**
 ```bash
-git clone https://github.com/tu-usuario/tu-repo.git
-cd tu-repo
+git clone https://github.com/DanyHook/poryect_spint_7.git
+cd poryect_spint_7.git
 
 
