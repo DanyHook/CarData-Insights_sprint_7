@@ -1,47 +1,67 @@
 import pandas as pd
 import plotly.express as px
 import streamlit as st
+import os
 
-# Leer el conjunto de datos
-car_data = pd.read_csv('vehicles_us.csv')
+# 📌 Verificar si el archivo CSV existe antes de cargarlo
+DATA_FILE = "vehicles_us.csv"
 
-# Crear encabezado
-st.header("Exploración de Datos de Vehículos Usados")
+if not os.path.exists(DATA_FILE):
+    st.error(f"Error: No se encontró el archivo `{DATA_FILE}`. Asegúrate de que está en la carpeta correcta.")
+    st.stop()  # Detiene la ejecución si no hay datos
 
-# Casilla de verificación para el histograma
-show_histogram = st.checkbox("Mostrar Histograma del Odómetro")
+# 📌 Cargar el conjunto de datos
+car_data = pd.read_csv(DATA_FILE)
 
-if show_histogram:
-    st.write("Creación de un histograma para el conjunto de datos de anuncios de venta de coches")
+# 📌 Validar que las columnas esenciales existen
+REQUIRED_COLUMNS = {"odometer", "price", "condition"}
+if not REQUIRED_COLUMNS.issubset(car_data.columns):
+    st.error(f"Error: El conjunto de datos no contiene las columnas necesarias: {REQUIRED_COLUMNS}")
+    st.stop()
 
-    # Crear un histograma con colores
-    fig_hist = px.histogram(
-        car_data, 
-        x="odometer",
-        title="Distribución del Odómetro en los Vehículos",
-        labels={"odometer": "Kilometraje"},
-        color_discrete_sequence=["blue"]  # Color personalizado
-    )
+# 📌 Encabezado de la aplicación
+st.header("🚗 CarData Insights: Exploración de Vehículos Usados")
 
-    # Mostrar gráfico interactivo
-    st.plotly_chart(fig_hist, use_container_width=True)
+# 📌 Filtrado interactivo de datos
+st.sidebar.header("🎛 Filtros de Datos")
 
-# Casilla de verificación para el gráfico de dispersión
-show_scatter = st.checkbox("Mostrar Gráfico de Dispersión Kilometraje vs. Precio")
+# Selector de rango para "odometer"
+min_km, max_km = st.sidebar.slider(
+    "Selecciona el rango de kilometraje:",
+    int(car_data["odometer"].min()), 
+    int(car_data["odometer"].max()), 
+    (int(car_data["odometer"].min()), int(car_data["odometer"].max()))
+)
 
-if show_scatter:
-    st.write("Creación de un gráfico de dispersión para analizar la relación entre el Kilometraje y el Precio")
+# Selector de rango para "price"
+min_price, max_price = st.sidebar.slider(
+    "Selecciona el rango de precio:",
+    int(car_data["price"].min()), 
+    int(car_data["price"].max()), 
+    (int(car_data["price"].min()), int(car_data["price"].max()))
+)
 
-    # Crear gráfico de dispersión con colores según condición del vehículo
-    fig_scatter = px.scatter(
-        car_data, 
-        x="odometer", 
-        y="price", 
-        color="condition",  # Colorea los puntos según la condición del auto
-        title="Relación entre Kilometraje y Precio de Vehículos",
-        labels={"odometer": "Kilometraje", "price": "Precio"},
-        color_discrete_sequence=px.colors.qualitative.Set1  # Paleta de colores llamativa
-    )
+# Aplicar filtros al dataset
+car_data = car_data[(car_data["odometer"].between(min_km, max_km)) & 
+                    (car_data["price"].between(min_price, max_price))]
 
-    # Mostrar gráfico interactivo
-    st.plotly_chart(fig_scatter, use_container_width=True)
+
+# 📌 Función para crear y mostrar gráficos
+def create_chart(chart_type, x, y=None, color=None, title="Gráfico"):
+    """Genera y muestra un gráfico con Plotly Express en Streamlit."""
+    if chart_type == "histogram":
+        fig = px.histogram(car_data, x=x, title=title, color_discrete_sequence=["blue"])
+    elif chart_type == "scatter":
+        fig = px.scatter(car_data, x=x, y=y, color=color, title=title, color_discrete_sequence=px.colors.qualitative.Set1)
+    else:
+        st.error("Tipo de gráfico no soportado.")
+        return
+    st.plotly_chart(fig, use_container_width=True)
+
+
+# 📌 Casillas de verificación para mostrar gráficos
+if st.checkbox("📊 Mostrar Histograma del Odómetro"):
+    create_chart("histogram", x="odometer", title="Distribución del Odómetro")
+
+if st.checkbox("📈 Mostrar Gráfico de Dispersión (Kilometraje vs Precio)"):
+    create_chart("scatter", x="odometer", y="price", color="condition", title="Relación entre Kilometraje y Precio")
