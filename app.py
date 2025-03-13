@@ -22,44 +22,47 @@ if not REQUIRED_COLUMNS.issubset(car_data.columns):
 # 📌 Encabezado de la aplicación
 st.header("🚗 CarData Insights: Exploración de Vehículos Usados")
 
-# 📌 Filtrado interactivo de datos
-st.sidebar.header("🎛 Filtros de Datos")
-
-# Selector de rango para "odometer"
-min_km, max_km = st.sidebar.slider(
-    "Selecciona el rango de kilometraje:",
-    int(car_data["odometer"].min()), 
-    int(car_data["odometer"].max()), 
-    (int(car_data["odometer"].min()), int(car_data["odometer"].max()))
-)
-
-# Selector de rango para "price"
-min_price, max_price = st.sidebar.slider(
-    "Selecciona el rango de precio:",
-    int(car_data["price"].min()), 
-    int(car_data["price"].max()), 
-    (int(car_data["price"].min()), int(car_data["price"].max()))
-)
-
-# Aplicar filtros al dataset
-car_data = car_data[(car_data["odometer"].between(min_km, max_km)) & 
-                    (car_data["price"].between(min_price, max_price))]
-
-
-# 📌 Función para crear y mostrar gráficos
+# 📌 Función para crear y mostrar gráficos con filtros individuales
 def create_chart(chart_type, x, y=None, color=None, title="Gráfico"):
-    """Genera y muestra un gráfico con Plotly Express en Streamlit."""
+    """Genera y muestra un gráfico con filtros específicos en Streamlit."""
+
+    # 📌 Agregar filtros personalizados dentro de cada gráfico
+    st.subheader(f"🎛 Filtros para {title}")
+    
+    # Filtro de kilometraje dentro del gráfico
+    min_km, max_km = st.slider(
+        "Selecciona el rango de kilometraje:",
+        int(car_data["odometer"].min()), 
+        int(car_data["odometer"].max()), 
+        (int(car_data["odometer"].min()), int(car_data["odometer"].max()))
+    )
+
+    # Filtro de precio dentro del gráfico
+    min_price, max_price = st.slider(
+        "Selecciona el rango de precio:",
+        int(car_data["price"].min()), 
+        int(car_data["price"].max()), 
+        (int(car_data["price"].min()), int(car_data["price"].max()))
+    )
+
+    # Aplicar filtros al dataset específico de este gráfico
+    filtered_data = car_data[(car_data["odometer"].between(min_km, max_km)) & 
+                             (car_data["price"].between(min_price, max_price))]
+
+    # 📌 Generar el gráfico
     if chart_type == "histogram":
-        fig = px.histogram(car_data, x=x, title=title, color_discrete_sequence=["blue"])
+        fig = px.histogram(filtered_data, x=x, title=title, color_discrete_sequence=["blue"])
     elif chart_type == "scatter":
-        fig = px.scatter(car_data, x=x, y=y, color=color, title=title, color_discrete_sequence=px.colors.qualitative.Set1)
+        fig = px.scatter(filtered_data, x=x, y=y, color=color, title=title, color_discrete_sequence=px.colors.qualitative.Set1)
     else:
         st.error("Tipo de gráfico no soportado.")
         return
+
+    # 📌 Mostrar el gráfico en la app
     st.plotly_chart(fig, use_container_width=True)
 
 
-# 📌 Casillas de verificación para mostrar gráficos
+# 📌 Casillas de verificación para mostrar gráficos con sus propios filtros
 if st.checkbox("📊 Mostrar Histograma del Odómetro"):
     create_chart("histogram", x="odometer", title="Distribución del Odómetro")
 
