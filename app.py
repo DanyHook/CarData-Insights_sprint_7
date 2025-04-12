@@ -1,70 +1,56 @@
 import pandas as pd
 import plotly.express as px
 import streamlit as st
-import os
 
-# 📌 Verificar si el archivo CSV existe antes de cargarlo
-DATA_FILE = "vehicles_us.csv"
+# Load the dataset
+car_data = pd.read_csv('vehicles_us.csv')
+car_data['manufacturer'] = car_data['model'].str.split().str[0].str.lower()
 
-if not os.path.exists(DATA_FILE):
-    st.error(f"Error: No se encontró el archivo `{DATA_FILE}`. Asegúrate de que está en la carpeta correcta.")
-    st.stop()  # Detiene la ejecución si no hay datos
+st.header("🚗 Used Car Data Exploration")
 
-# 📌 Cargar el conjunto de datos
-car_data = pd.read_csv(DATA_FILE)
+# 1. Data viewer: Include manufacturers with less than 1000 ads
+st.subheader("🔍 Manufacturers with Less Than 1000 Listings")
+manufacturer_counts = car_data['manufacturer'].value_counts()
+rare_makers = manufacturer_counts[manufacturer_counts < 1000].index
+filtered_data = car_data[car_data['manufacturer'].isin(rare_makers)]
+st.dataframe(filtered_data[['manufacturer', 'model', 'price', 'condition', 'type']])
 
-# 📌 Validar que las columnas esenciales existen
-REQUIRED_COLUMNS = {"odometer", "price", "condition"}
-if not REQUIRED_COLUMNS.issubset(car_data.columns):
-    st.error(f"Error: El conjunto de datos no contiene las columnas necesarias: {REQUIRED_COLUMNS}")
-    st.stop()
+# 2. Vehicle types by manufacturer
+st.subheader("🚙 Vehicle Types by Manufacturer")
+type_counts = car_data.groupby('manufacturer')['type'].count().reset_index()
+fig_type_count = px.bar(type_counts, x='manufacturer', y='type',
+                        labels={'type': 'Vehicle Count'},
+                        title='Vehicle Count by Manufacturer')
+st.plotly_chart(fig_type_count, use_container_width=True)
 
-# 📌 Encabezado de la aplicación
-st.header("🚗 CarData Insights: Exploración de Vehículos Usados")
+# 3. Histogram of condition vs model_year
+st.subheader("📅 Histogram: Condition vs. Model Year")
+valid_condition = car_data.dropna(subset=['model_year', 'condition'])
+fig_cond_year = px.histogram(valid_condition, x='model_year', color='condition',
+                             barmode='group',
+                             title='Vehicle Condition by Model Year',
+                             labels={'model_year': 'Model Year', 'condition': 'Condition'})
+st.plotly_chart(fig_cond_year, use_container_width=True)
 
-# 📌 Función para crear y mostrar gráficos con filtros individuales
-def create_chart(chart_type, x, y=None, color=None, title="Gráfico"):
-    """Genera y muestra un gráfico con filtros específicos en Streamlit."""
+# 4. Compare price between manufacturers
+st.subheader("💰 Compare Prices Between Manufacturers")
 
-    # 📌 Agregar filtros personalizados dentro de cada gráfico
-    st.subheader(f"🎛 Filtros para {title}")
-    
-    # Filtro de kilometraje dentro del gráfico
-    min_km, max_km = st.slider(
-        "Selecciona el rango de kilometraje:",
-        int(car_data["odometer"].min()), 
-        int(car_data["odometer"].max()), 
-        (int(car_data["odometer"].min()), int(car_data["odometer"].max()))
-    )
+# Dropdowns
+makers = sorted(car_data['manufacturer'].dropna().unique())
+maker1 = st.selectbox("Select Manufacturer 1", makers, index=0)
+maker2 = st.selectbox("Select Manufacturer 2", makers, index=1)
 
-    # Filtro de precio dentro del gráfico
-    min_price, max_price = st.slider(
-        "Selecciona el rango de precio:",
-        int(car_data["price"].min()), 
-        int(car_data["price"].max()), 
-        (int(car_data["price"].min()), int(car_data["price"].max()))
-    )
+# Optional normalization
+normalize = st.checkbox("Normalize Histogram (Percentage)")
 
-    # Aplicar filtros al dataset específico de este gráfico
-    filtered_data = car_data[(car_data["odometer"].between(min_km, max_km)) & 
-                             (car_data["price"].between(min_price, max_price))]
+# Filter data by manufacturer and valid prices
+data_compare = car_data[car_data['manufacturer'].isin([maker1, maker2])]
+data_compare = data_compare[data_compare['price'] > 0]
 
-    # 📌 Generar el gráfico
-    if chart_type == "histogram":
-        fig = px.histogram(filtered_data, x=x, title=title, color_discrete_sequence=["blue"])
-    elif chart_type == "scatter":
-        fig = px.scatter(filtered_data, x=x, y=y, color=color, title=title, color_discrete_sequence=px.colors.qualitative.Set1)
-    else:
-        st.error("Tipo de gráfico no soportado.")
-        return
-
-    # 📌 Mostrar el gráfico en la app
-    st.plotly_chart(fig, use_container_width=True)
-
-
-# 📌 Casillas de verificación para mostrar gráficos con sus propios filtros
-if st.checkbox("📊 Mostrar Histograma del Odómetro"):
-    create_chart("histogram", x="odometer", title="Distribución del Odómetro")
-
-if st.checkbox("📈 Mostrar Gráfico de Dispersión (Kilometraje vs Precio)"):
-    create_chart("scatter", x="odometer", y="price", color="condition", title="Relación entre Kilometraje y Precio")
+# Comparative histogram
+fig_price = px.histogram(data_compare, x='price', color='manufacturer',
+                         nbins=50,
+                         histnorm='percent' if normalize else None,
+                         title=f"Price Comparison: {maker1} vs {maker2}",
+                         labels={'price': 'Price', 'manufacturer': 'Manufacturer'})
+st.plotly_chart(fig_price, use_container_width=True)
