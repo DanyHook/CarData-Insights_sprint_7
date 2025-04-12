@@ -1,30 +1,29 @@
-# poryect_spint_7
-# 🚗 CarData Insights: Exploración de Datos de Vehículos Usados
+# project_spint_7
+# 🚗 CarData Insights: Used Vehicle Data Exploration
 
-**CarData Insights** es una aplicación web interactiva desarrollada con **Streamlit** que permite analizar datos de vehículos usados mediante gráficos dinámicos. La aplicación ayuda a visualizar tendencias en el kilometraje, precios y condiciones de los autos en venta.
+**CarData Insights** is an interactive web application built with **Streamlit** that allows users to analyze used car data through dynamic visualizations. The app helps identify trends in mileage, prices, and vehicle conditions.
 
-## 🌟 Características principales
-✅ **Visualización interactiva**: Usa gráficos dinámicos para explorar el conjunto de datos.  
-✅ **Histograma del odómetro**: Muestra la distribución del kilometraje de los vehículos.  
-✅ **Gráfico de dispersión Kilometraje vs. Precio**: Permite analizar la relación entre estas dos variables.  
-✅ **Interfaz intuitiva**: Los gráficos se activan mediante casillas de verificación, permitiendo una exploración sencilla.  
+## 🌟 Key Features
+✅ **Interactive visualization**: Explore the dataset using dynamic charts.  
+✅ **Odometer histogram**: Displays the distribution of vehicle mileage.  
+✅ **Mileage vs. Price scatter plot**: Analyze the relationship between these two variables.  
+✅ **User-friendly interface**: Charts are activated through checkboxes for easy exploration.  
 
-## 📂 Datos utilizados
-La aplicación usa el dataset `vehicles_us.csv`, que contiene información sobre autos usados en EE.UU., incluyendo:
-- **Kilometraje (`odometer`)**
-- **Precio (`price`)**
-- **Condición del vehículo (`condition`)**
-- **Otros atributos relevantes**
+## 📂 Data Used
+The app uses the `vehicles_us.csv` dataset, which contains information on used cars in the U.S., including:
+- **Mileage (`odometer`)**
+- **Price (`price`)**
+- **Vehicle condition (`condition`)**
+- **Other relevant attributes**
 
-## 📊 Enlace a Render:
+## 📊 Render App Link:
 https://cardata-insights.onrender.com/
-## 💻 Enlace a Github:
+
+## 💻 GitHub Repository:
 https://github.com/DanyHook/poryect_spint_7.git
 
-## 🚀 Cómo ejecutar la aplicación
-### 🔹 **1. Clonar el repositorio**
+## 🚀 How to Run the Application
+### 🔹 **1. Clone the repository**
 ```bash
 git clone https://github.com/DanyHook/poryect_spint_7.git
 cd poryect_spint_7.git
-
-
